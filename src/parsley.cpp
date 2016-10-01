@@ -4426,6 +4426,24 @@ void APar_MergeTempFile(FILE* dest_file, FILE *src_file, uint64_t src_file_size,
 }
 
 #ifdef __linux__
+// Splice from fcntl-linux.h
+
+/* Flags for SPLICE and VMSPLICE.  */
+#define SPLICE_F_MOVE		1	/* Move pages instead of copying.  */
+#define SPLICE_F_NONBLOCK	2	/* Don't block on the pipe splicing
+					   (but we may still block on the fd
+					   we splice from/to).  */
+#define SPLICE_F_MORE		4	/* Expect more data.  */
+#define SPLICE_F_GIFT		8	/* Pages passed in are a gift.  */
+
+/* Splice two files together.
+
+   This function is a possible cancellation point and therefore not
+   marked with __THROW.  */
+extern "C" ssize_t splice (int __fdin, off64_t *__offin, int __fdout,
+		       off64_t *__offout, size_t __len,
+		       unsigned int __flags);
+
 /* use kernel provided zero-copy interface to improve throughput
  * around the data passthru portions of our operation; no sense
  * copying multiple GB of data around in memory if we can avoid it */
