@@ -100,3 +100,5 @@ uint32_t widechar_len(char* instring, uint32_t _bytes_);
 bool APar_assert(bool expression, int error_msg, const char* supplemental_info);
 
 unsigned long xor4096i();
+
+int fseek64(FILE *stream, off64_t offset, int origin);

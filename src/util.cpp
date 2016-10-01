@@ -56,7 +56,7 @@ uint64_t findFileSize(const char *utf8_filepath) {
 #endif
 	{
 		struct stat fileStats;
-		stat(utf8_filepath, &fileStats);
+		stat64(utf8_filepath, &fileStats);
 		return fileStats.st_size;
 	}
 	return 0; //won't ever get here.... unless this is win32, set to utf8 and the folder/file had unicode.... TODO (? use isUTF8() for high ascii?)
@@ -908,4 +908,20 @@ unsigned long xor4096i() {
 #undef c
 #undef d
 #undef ws 
+}
+
+int fseek64(FILE *stream, off64_t offset, int origin)
+{
+	int fd;
+
+	if (feof(stream))
+		rewind (stream);
+	else
+		setbuf (stream, NULL);
+
+	fd = fileno(stream);
+	if (lseek64(fd, offset, origin) == -1)
+		return errno;
+
+	return 0;
 }

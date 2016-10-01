@@ -1290,7 +1290,7 @@ void APar_ScanAtoms(const char *path, bool deepscan_REQ) {
 					APar_TestCompatibleBrand(file, 0, dataSize);
 				}
 
-				fseek(file, jump, SEEK_SET);
+				fseek64(file, jump, SEEK_SET);
 
 				while (jump < file_size) {
 
@@ -1556,7 +1556,7 @@ void APar_ScanAtoms(const char *path, bool deepscan_REQ) {
 						break;
 					}
 
-					fseeko(file, jump, SEEK_SET);
+					fseek64(file, jump, SEEK_SET);
 				}
 
 			} else {
@@ -4381,31 +4381,15 @@ void APar_MergeTempFile(FILE* dest_file, FILE *src_file, uint64_t src_file_size,
 		if (file_pos + max_buffer <= src_file_size ) {
 			APar_readX(buffer, src_file, file_pos, max_buffer);
 
-			//fseek(dest_file, dest_position + file_pos, SEEK_SET);
-#if defined(_WIN32)
-			fpos_t file_offset = dest_position + file_pos;
-#elif defined(__GLIBC__)
-			fpos_t file_offset = {0};
-			file_offset.__pos = dest_position + file_pos;
-#else
-			off_t file_offset = dest_position + file_pos;
-#endif
-			fsetpos(dest_file, &file_offset);
+			fseek64(dest_file, dest_position + file_pos, SEEK_SET);
 			fwrite(buffer, max_buffer, 1, dest_file);
 			file_pos += max_buffer;
 
 		} else {
 			APar_readX(buffer, src_file, file_pos, src_file_size - file_pos);
 			//fprintf(stdout, "buff starts with %s\n", buffer+4);
-#if defined(_WIN32)
-			fpos_t file_offset = dest_position + file_pos;
-#elif defined(__GLIBC__)
-			fpos_t file_offset = {0};
-			file_offset.__pos = dest_position + file_pos;
-#else
-			off_t file_offset = dest_position + file_pos;
-#endif
-			fsetpos(dest_file, &file_offset );
+
+			fseek64(dest_file, dest_position + file_pos, SEEK_SET);
 			fwrite(buffer, src_file_size - file_pos, 1, dest_file);
 			file_pos += src_file_size - file_pos;
 			break;
@@ -4416,7 +4400,7 @@ void APar_MergeTempFile(FILE* dest_file, FILE *src_file, uint64_t src_file_size,
 		fflush(dest_file);
 		SetEndOfFile((HANDLE)_get_osfhandle(_fileno(dest_file)));
 #else
-		if(ftruncate(fileno(dest_file), src_file_size+dest_position) == -1) {
+		if(ftruncate64(fileno(dest_file), src_file_size+dest_position) == -1) {
 			perror("Failed to truncate file: ");
 			exit(1);
 		}
@@ -4453,8 +4437,8 @@ uint64_t splice_copy(int sfd, int ofd, uint64_t block_size,
 	int pfd[2];
 	int res;
 	uint64_t lim = LONG_MAX;
-	loff_t spos = src_offset;
-	loff_t dpos = dest_offset;
+	off64_t spos = src_offset;
+	off64_t dpos = dest_offset;
 	long didread;
 	long didwrite;
 	uint64_t bytes_written = 0;
@@ -4534,8 +4518,8 @@ uint64_t block_copy(FILE *source_file, FILE *out_file,
 	}
 #endif
 
-	fseeko(source_file, src_offset, SEEK_SET);
-	fseeko(out_file, dest_offset, SEEK_SET);
+	fseek64(source_file, src_offset, SEEK_SET);
+	fseek64(out_file, dest_offset, SEEK_SET);
 
 	while (toread) {
 		char *bpos;
@@ -4576,7 +4560,7 @@ uint64_t APar_WriteAtomically(FILE* source_file, FILE* temp_file,
 
 	//write the length of the atom first... taken from our tree in memory
 	UInt32_TO_String4(parsedAtoms[this_atom].AtomicLength, twenty_byte_buffer);
-	fseeko(temp_file, bytes_written_tally, SEEK_SET);
+	fseek64(temp_file, bytes_written_tally, SEEK_SET);
 	fwrite(twenty_byte_buffer, 4, 1, temp_file);
 	bytes_written += 4;
 
@@ -4657,7 +4641,7 @@ uint64_t APar_WriteAtomically(FILE* source_file, FILE* temp_file,
 		uint64_t atom_name_len = 4;
 
 		//fprintf(stdout, "Writing atom %s from memory %u\n", parsedAtoms[this_atom].AtomicName, parsedAtoms[this_atom].AtomicClassification);
-		fseeko(temp_file, bytes_written_tally + bytes_written, SEEK_SET);
+		fseek64(temp_file, bytes_written_tally + bytes_written, SEEK_SET);
 
 		if (parsedAtoms[this_atom].AtomicClassification == EXTENDED_ATOM) {
 			fwrite("uuid", 4, 1, temp_file);
@@ -4761,7 +4745,7 @@ void APar_copy_gapless_padding(FILE* mp4file, uint64_t last_atom_pos, char* buff
 		if (gapless_padding_bytes_written + max_buffer <= gapless_void_padding ) {
 			memset(buffer, 0, max_buffer);
 
-			fseeko(mp4file, last_atom_pos + gapless_padding_bytes_written,
+			fseek64(mp4file, last_atom_pos + gapless_padding_bytes_written,
 				SEEK_SET);
 			fwrite(buffer, max_buffer, 1, mp4file);
 			gapless_padding_bytes_written += max_buffer;
@@ -4769,7 +4753,7 @@ void APar_copy_gapless_padding(FILE* mp4file, uint64_t last_atom_pos, char* buff
 		} else { //less then 512k of gapless padding (here's hoping we get here always)
 			memset(buffer, 0, gapless_void_padding - gapless_padding_bytes_written);
 
-			fseeko(mp4file, last_atom_pos + gapless_padding_bytes_written, SEEK_SET);
+			fseek64(mp4file, last_atom_pos + gapless_padding_bytes_written, SEEK_SET);
 			fwrite(buffer, gapless_void_padding - gapless_padding_bytes_written, 1, mp4file);
 			gapless_padding_bytes_written += gapless_void_padding - gapless_padding_bytes_written;
 			break;
