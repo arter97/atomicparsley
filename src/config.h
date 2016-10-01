@@ -36,7 +36,7 @@
 #define HAVE_LINUX_CDROM_H 1
 
 /* Define to 1 if you have the `lroundf' function. */
-/* #undef HAVE_LROUNDF */
+#define HAVE_LROUNDF 1
 
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
