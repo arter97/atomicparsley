@@ -55,7 +55,7 @@ uint64_t findFileSize(const char *utf8_filepath) {
 	} else
 #endif
 	{
-		struct stat fileStats;
+		struct stat64 fileStats;
 		stat64(utf8_filepath, &fileStats);
 		return fileStats.st_size;
 	}
