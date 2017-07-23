@@ -1,8 +1,8 @@
 #!/bin/bash
 
-/home/arter97/android/ndk/aarch64-linux-android-4.9/bin/aarch64-linux-android-g++ \
+/home/arter97/android/ndk/arm64/bin/aarch64-linux-android-clang++ \
     -DHAVE_CONFIG_H -I. -I./src -DHAVE_CONFIG_H -D_FILE_OFFSET_BITS=64 -Wall \
-    -O3 -march=armv8-a -mtune=cortex-a57.cortex-a53 -fPIC -fPIE -pie -pipe -s \
+    -O3 -march=armv8-a -mtune=cortex-a57 -fPIC -Wl,-pie -pipe -s \
     -o AtomicParsley \
        src/util.cpp \
        src/arrays.cpp \
