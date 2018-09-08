@@ -2,7 +2,7 @@
 
 /home/arter97/android/ndk/arm64/bin/aarch64-linux-android-clang++ \
     -DHAVE_CONFIG_H -I. -I./src -DHAVE_CONFIG_H -Wall \
-    -O3 -march=armv8-a -mtune=cortex-a57 -fPIC -Wl,-pie -pipe -s \
+    -flto -O3 -march=armv8-a -mtune=cortex-a57 -fPIC -Wl,-pie -pipe -s \
     -o AtomicParsley \
        src/util.cpp \
        src/arrays.cpp \
